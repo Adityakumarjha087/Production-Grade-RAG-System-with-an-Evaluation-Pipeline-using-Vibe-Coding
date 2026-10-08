@@ -1,0 +1,11 @@
+# Runs everything locally without an API key: Docling parsing, real embedding +
+# reranker models, deterministic extractive "LLM", lexical judge, in-process cache.
+# Once ANTHROPIC_API_KEY is set, use configs/base.yaml (Claude + RAGAS judge + Redis).
+extends: base.yaml
+name: local
+generation:
+  provider: extractive
+cache:
+  backend: memory
+eval:
+  judge_backend: lexical

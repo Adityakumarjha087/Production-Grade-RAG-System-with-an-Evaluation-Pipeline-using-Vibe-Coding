@@ -1,0 +1,68 @@
+# docker compose up -d                          -> qdrant + redis + api
+# docker compose --profile jobs run --rm ingest -> build the index from ./data/raw
+# Langfuse: use Langfuse Cloud (set keys in .env) or self-host per README.
+name: ragsys
+
+x-app-env: &app-env
+  QDRANT_URL: http://qdrant:6333
+  REDIS_URL: redis://redis:6379/0
+  RAG_CONFIG: ${RAG_CONFIG:-configs/docker.yaml}
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.1
+    ports: ["6333:6333"]
+    volumes: [qdrant_data:/qdrant/storage]
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.8.3-alpine
+    # Pure cache: bounded memory, LRU eviction, no persistence needed.
+    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      args:
+        EXTRAS: ""
+    image: ragsys:latest
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    ports: ["8000:8000"]
+    volumes:
+      - models:/models          # ONNX weights downloaded once, reused across restarts
+    depends_on:
+      qdrant: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+
+  ingest:
+    image: ragsys:latest
+    profiles: ["jobs"]
+    env_file:
+      - path: .env
+        required: false
+    environment: *app-env
+    command: ["ragsys", "ingest", "--strategy", "all"]
+    volumes:
+      - ./data:/app/data
+      - models:/models
+    depends_on:
+      qdrant: {condition: service_healthy}
+
+volumes:
+  qdrant_data:
+  models:

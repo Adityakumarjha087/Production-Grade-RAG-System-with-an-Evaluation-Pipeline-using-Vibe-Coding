@@ -1,0 +1,21 @@
+# Evaluation matrix: every chunker x every retrieval variant (3 x 5 = 15 configs).
+# Each entry is an overlay deep-merged onto the base config.
+chunkers:
+  fixed:      {chunking: {strategy: fixed}}
+  recursive:  {chunking: {strategy: recursive}}
+  structural: {chunking: {strategy: structural}}
+
+retrieval:
+  dense:
+    retrieval: {dense: {enabled: true}, sparse: {enabled: false}, rerank: {enabled: false}}
+  bm25:
+    retrieval: {dense: {enabled: false}, sparse: {enabled: true}, rerank: {enabled: false}}
+  hybrid:
+    retrieval: {dense: {enabled: true}, sparse: {enabled: true}, rerank: {enabled: false}}
+  hybrid_rerank:
+    retrieval: {dense: {enabled: true}, sparse: {enabled: true}, rerank: {enabled: true}}
+  hybrid_rerank_bge:   # larger cross-encoder: better quality? worth ~4x rerank latency?
+    retrieval:
+      dense: {enabled: true}
+      sparse: {enabled: true}
+      rerank: {enabled: true, model: BAAI/bge-reranker-base}

@@ -1,0 +1,78 @@
+# Default pipeline configuration. Secrets/endpoints live in .env, not here.
+# Experiments in configs/experiments/ are deep-merged on top of this file.
+name: default
+
+paths:
+  raw_dir: data/raw
+  parsed_dir: data/parsed
+  testset_path: data/testsets/testset.jsonl
+  results_dir: eval/results
+  llm_cache_dir: data/cache/llm
+
+parsing:
+  parser: docling          # layout + table aware; falls back to pymupdf on failure
+  fallback_parser: pymupdf
+
+chunking:
+  strategy: structural     # fixed | recursive | structural
+  chunk_size: 1200         # characters (~300 tokens), safely under bge's 512-token limit
+  chunk_overlap: 150
+  min_chunk_size: 200
+
+embedding:
+  provider: fastembed
+  model: BAAI/bge-base-en-v1.5
+  dim: 768
+  batch_size: 32
+
+index:
+  collection_prefix: sebi
+  upsert_batch_size: 128
+
+retrieval:
+  dense:  {enabled: true, top_k: 30}
+  sparse: {enabled: true, top_k: 30, k1: 1.2, b: 0.75}
+  fusion: {rrf_k: 60}
+  # MiniLM-L12 (33M params) is ~4x faster than bge-reranker-base (278M); the eval matrix
+  # measures both (quality vs p50 latency) — see DECISIONS.md D-009.
+  rerank: {enabled: true, provider: fastembed, model: Xenova/ms-marco-MiniLM-L-12-v2, candidates: 20}
+  final_k: 6
+
+generation:
+  provider: anthropic      # anthropic | extractive (offline, deterministic)
+  model: claude-opus-5-5
+  effort: low              # grounded QA over short context does not need deep thinking
+  max_tokens: 4096
+  use_fallbacks: true      # server-side refusal fallback (Claude API only)
+  abstention:
+    enabled: true
+    min_rerank_score: 0.15 # calibrate with `ragsys eval` (see DECISIONS.md D-012)
+    min_dense_score: 0.55
+    require_citation: true
+
+cache:
+  backend: redis           # redis | memory | none
+  ttl_seconds: 86400
+  max_entries: 1024
+
+tracing:
+  enabled: true
+  sample_rate: 1.0
+
+# USD per 1M tokens. Keep in config: prices change, code shouldn't.
+pricing:
+  claude-opus-5-5:   {input: 4.0, output: 20.0, cache_read: 0.20, cache_write: 5.0}
+  claude-sonnet-5-5: {input: 2.0, output: 10.0, cache_read: 0.20, cache_write: 2.5}
+  claude-haiku-4-5:  {input: 1.0, output: 5.0,  cache_read: 0.10, cache_write: 1.25}
+  claude-opus-5:     {input: 5.0, output: 25.0, cache_read: 0.50, cache_write: 6.25}
+  claude-opus-4-8:   {input: 5.0, output: 25.0, cache_read: 0.50, cache_write: 6.25}
+  extractive:        {input: 0.0, output: 0.0}
+
+eval:
+  judge_backend: ragas     # ragas | lexical (offline proxy)
+  judge_model: claude-sonnet-5-5   # different model than the generator: avoids self-preference bias
+  testgen_model: claude-opus-5-5
+  answer_subset: 30
+  ks: [1, 3, 5, 10]
+  relevance_overlap: 0.5
+  seed: 13

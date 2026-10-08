@@ -1,0 +1,10 @@
+# Used by docker-compose: Redis cache, fast parser inside the slim image.
+# Switch generation.provider to anthropic once ANTHROPIC_API_KEY is set in .env.
+extends: base.yaml
+name: docker
+parsing:
+  parser: pymupdf
+generation:
+  provider: extractive
+cache:
+  backend: redis

@@ -1,0 +1,73 @@
+# Hand-written seed test set over real SEBI circulars (2026). Written by the assistant
+# from the source PDFs; every quote is verbatim. Items load as "pending" — review them
+# (`ragsys testset review`) before trusting any numbers. `doc` = SEBI id in the filename.
+items:
+  - {qtype: factual, doc: "104094", question: "From which date do the ETF base price, price band and call auction norms of the June 15, 2026 circular now apply?",
+     answer: "The implementation was extended; the circular now comes into effect from 7th September 2026 (instead of 1st September 2026).",
+     quotes: ["The circular shall now come into effect from 7th September 2026"]}
+  - {qtype: factual, doc: "102229", question: "When does the clarification on the early pay-in benefit in the commodity derivatives segment come into effect?",
+     answer: "From September 21, 2026.", quotes: ["This circular shall come into effect from September 21, 2026"]}
+  - {qtype: factual, doc: "102229", question: "If a market participant makes early pay-in of commodities, which margin must the clearing corporation still collect?",
+     answer: "Clearing corporations may exempt other margins based on risk perception but must continue to collect mark to market margins on such positions.",
+     quotes: ["shall continue to collect mark to market margins"]}
+  - {qtype: factual, doc: "100786", question: "Until when did SEBI extend the validity of observation letters for public issues expiring between April and September 2026?",
+     answer: "Observation letters expiring between April 1, 2026 and September 30, 2026 were extended till September 30, 2026 as a one-time relaxation, subject to an undertaking from the Lead Manager.",
+     quotes: ["grant one time relaxation to extend validity of the SEBI Observations letters"]}
+  - {qtype: factual, doc: "100786", question: "Under ICDR Regulations 44(1) and 59C, within what time must a public issue open after SEBI issues observations?",
+     answer: "Within twelve months and eighteen months respectively from the date of SEBI observations.",
+     quotes: ["a public issue may be opened within twelve months and eighteen months respectively"]}
+  - {qtype: factual, doc: "99814", question: "From what date do the provisions on forms for registration of stock brokers and clearing members apply?",
+     answer: "Retrospectively from the date of notification of the SEBI (Stock Brokers) Regulations, 2026, i.e. January 07, 2026.",
+     quotes: ["January 07, 2026"]}
+  - {qtype: factual, doc: "101090", question: "What counts as an 'outright transaction' for net settlement of funds by FPIs in the cash market?",
+     answer: "Either a purchase or a sale transaction, but not both, in a security in a settlement cycle.",
+     quotes: ["shall mean either a purchase or a sale transaction, but not both"]}
+  - {qtype: factual, doc: "101090", question: "Why were FPI transactions historically settled on a gross basis?",
+     answer: "Because no institutional investor is allowed to do day trading (square off intra-day), so FPI transactions are grossed at the custodian level.",
+     quotes: ["no institutional investor shall be allowed to do day trading"]}
+  - {qtype: factual, doc: "101522", question: "From when does the revised Monthly Cumulative Report (MCR) format for mutual funds apply?",
+     answer: "From June 2026 onwards.", quotes: ["modify MCR format from June 2026 onwards"]}
+  - {qtype: factual, doc: "102914", question: "Before the July 2026 circular, could investors set up SWP or STP standing instructions for mutual fund units held in demat form?",
+     answer: "No; the facility was not available for units held in demat form, and the circular extends it in two phases.",
+     quotes: ["is not available for the Mutual Fund units held in demat form"]}
+  - {qtype: factual, doc: "99122", question: "How is the closing price of stocks in the equity cash segment determined before the Closing Auction Session is introduced?",
+     answer: "By the volume weighted average price (VWAP) of trades in the last thirty minutes of the continuous trading session.",
+     quotes: ["of trades executed during the last thirty minutes"]}
+  - {qtype: factual, doc: "99533", question: "Is the calendar spread margin benefit available on expiry day for single stock derivatives?",
+     answer: "No. The benefit of offsetting positions across expiries is not available on the expiry day for contracts expiring that day in single stock derivatives.",
+     quotes: ["shall not be available on the day of expiry for contracts"]}
+  - {qtype: factual, doc: "99703", question: "How large must a commodity exchange's trading system capacity be relative to its peak order load?",
+     answer: "At least four times the peak order load encountered.", quotes: ["at least four times the peak order load encountered"]}
+  - {qtype: factual, doc: "100329", question: "Why do mutual funds take intraday borrowings for liquid and overnight schemes?",
+     answer: "Redemption payouts go out in the morning of T+1 while maturity proceeds from TREPS/reverse repo arrive in the evening; intraday borrowing bridges this timing mismatch.",
+     quotes: ["bridge the intraday timing mismatch of inflow and outflow of funds"]}
+  - {qtype: factual, doc: "100565", question: "Can a member of the Institute of Cost Accountants of India conduct the annual audit of a research analyst?",
+     answer: "Yes; SEBI modified the Master Circular to clarify that such members are eligible to conduct the annual audit of research analysts.",
+     quotes: ["clarify eligibility of members of the Institute of Cost Accountants of India"]}
+  - {qtype: factual, doc: "100935", question: "For how long can a Not for Profit Organization remain registered on the Social Stock Exchange without raising funds?",
+     answer: "Three years (extended from two years).", quotes: ["from two years to three years without undertaking fund raising through SSE"]}
+  - {qtype: factual, doc: "100935", question: "What is the revised minimum subscription requirement for Zero Coupon Zero Principal instruments?",
+     answer: "Reduced from 75% to 50%, subject to due diligence by the Social Stock Exchange.", quotes: ["from 75% to 50%"]}
+  - {qtype: factual, doc: "101467", question: "After an SPV's concession agreement ends, how long does an InvIT investment manager have to exit or add a new project to that SPV?",
+     answer: "Within one year from completion/termination of the concession agreement (or conclusion of pending claims).",
+     quotes: ["infrastructure project in such SPV, within one year from"]}
+  - {qtype: factual, doc: "102762", question: "For what purposes may mutual funds avail intraday borrowings?",
+     answer: "Unitholder pay-outs (redemptions, IDCW, interest), pay-in for scheme investments, MTM obligations and foreign exchange settlements, and repayment of existing borrowings.",
+     quotes: ["All unitholder pay-outs such as redemptions, IDCW pay-outs, interest etc.", "MTM obligations and foreign exchange settlements"]}
+  - {qtype: factual, doc: "101271", question: "Which provision of the Index Provider Regulations defines 'Significant Indices'?",
+     answer: "Regulation 2(1)(u) of the SEBI (Index Providers) Regulations, 2024.", quotes: ["Regulation 2(1)(u) of IP Regulations defines"]}
+  - {qtype: factual, doc: "103241", question: "What does the GARUDA mechanism for AIFs stand for?",
+     answer: "Green-Channel: AIF Rollout Upon Document Acknowledgement, a mechanism for processing placement memoranda of AIFs filed with SEBI.",
+     quotes: ["AIF Rollout Upon Document Acknowledgement"]}
+  - {qtype: factual, doc: "100400", question: "Under the existing SGF stress-testing norms for commodity derivatives, the default of how many clearing members must be covered?",
+     answer: "The simultaneous default of at least 2 clearing members (and their associates) causing the highest credit exposure.",
+     quotes: ["simultaneous default of at least 2 clearing members"]}
+  - {qtype: factual, doc: "102171", question: "Which AIF regulation allows a fund to be tagged as an inoperative fund?",
+     answer: "Regulation 29(10A) of the SEBI (AIF) Regulations, 2012.", quotes: ["An AIF may be tagged as an inoperative fund"]}
+  - {qtype: multi_hop, question: "Which later circular superseded the March 2026 guidelines on borrowings by mutual funds, and under which regulation are mutual funds permitted to borrow?",
+     answer: "The July 10, 2026 circular on intraday borrowing facility superseded clause 5.9.1 of the Master Circular and the March 25, 2026 circular; borrowing is permitted under Regulation 42(1) of the SEBI (Mutual Funds) Regulations, 2026.",
+     quotes: ["in supersession of the guidelines on borrowings of mutual funds", "Regulation 42(1) of SEBI (Mutual Funds) Regulations, 2026 permits mutual funds to borrow"]}
+  - {qtype: unanswerable, question: "What monetary penalty does SEBI impose on a custodian that fails to segregate its financial services activities?", answer: "", quotes: []}
+  - {qtype: unanswerable, question: "What is the maximum brokerage a stock broker may charge on intraday equity trades?", answer: "", quotes: []}
+  - {qtype: unanswerable, question: "Within how many days can an investor appeal a SEBI order before the Securities Appellate Tribunal?", answer: "", quotes: []}
+  - {qtype: unanswerable, question: "What is the minimum net worth required to register as a crypto asset exchange with SEBI?", answer: "", quotes: []}
