@@ -316,6 +316,27 @@ digital-accessibility timelines has no text layer; PyMuPDF extracts 0 characters
 **Decision:** a cheap PyMuPDF check (< 100 chars/page ⇒ scanned) routes only scanned
 PDFs through the OCR pipeline. The scanned circular now yields its full text and title.
 
+## D-030 · Superscript ordinals, and why the parse cache needs a version
+
+**Found on real data.** Building the seed test set, one item was rejected by the
+verbatim-quote check (D-016): the 28 Aug 2026 ETF circular reads *"shall now come into
+effect from 7 th September 2026"*. The ordinal suffix is a separate text run in the PDF
+(it is superscripted), so **every** parser sees the gap. Effective dates are the most
+cited fact in a circular, and the gap both emits a useless bare `th` BM25 token and
+leaks into quoted answers.
+**Decision.** `normalize_text` re-attaches `(?<=\d)\s+(st|nd|rd|th)\b`. The lookbehind
+and the trailing `\b` keep words that merely start like an ordinal intact — `Regulation
+23 the`, `Chapter 5 Standard`, `10 thousand` — which is what the tests pin.
+
+**The second-order bug.** The parse cache was keyed by PDF content alone, so changing
+the normaliser would have silently kept serving documents produced by the old one — and
+stale canonical text propagates into chunks, embeddings, citations *and* gold evidence
+spans with nothing to signal it. **Decision:** the cache key carries
+`PARSE_SCHEMA_VERSION`, bumped whenever a parser, the element builder, normalisation or
+the `Document` schema changes; a test asserts a bump forces a re-parse. This is the
+ingestion-side analogue of the index version (D-010) and the cache fingerprint (D-018):
+**every derived artefact is keyed by everything that produced it.**
+
 ---
 
 ## Known limitations / next steps
