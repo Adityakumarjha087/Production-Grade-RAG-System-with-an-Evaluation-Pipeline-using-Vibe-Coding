@@ -9,21 +9,29 @@ from collections.abc import Sequence
 
 _HYPHEN_BREAK = re.compile(r"(\w)-\n(\w)")
 _SOFT_BREAK = re.compile(r"(?<![\n.:;])\n(?!\n)")
-_SPACES = re.compile(r"[ \t ]+")
+_SPACES = re.compile(r"[ \t ]+")
 _MANY_NEWLINES = re.compile(r"\n{3,}")
 _PAGE_NUMBER = re.compile(r"^\s*(page\s*)?\d+(\s*(of|/)\s*\d+)?\s*$", re.IGNORECASE)
+
+# Superscript ordinals ("1<sup>st</sup> April") extract as "1 st April". The suffix
+# is a separate text run in the PDF, so every parser sees the gap. Dates are the most
+# cited fact in a circular ("shall come into effect from 7 th September 2026"), and the
+# gap both breaks BM25 (a bare "th" token) and leaks into quoted answers.
+_SPLIT_ORDINAL = re.compile(r"(?<=\d)\s+(st|nd|rd|th)\b")
 
 
 def normalize_text(text: str) -> str:
     """Normalise unicode, re-join hyphenated words and collapse whitespace.
 
     Single line breaks inside a paragraph (PDF line wrapping) become spaces;
-    blank lines (paragraph breaks) are preserved.
+    blank lines (paragraph breaks) are preserved. Ordinal suffixes split off their
+    number by superscript formatting are re-attached.
     """
     text = unicodedata.normalize("NFKC", text).replace("\r", "")
     text = _HYPHEN_BREAK.sub(r"\1\2", text)
     text = _SOFT_BREAK.sub(" ", text)
     text = _SPACES.sub(" ", text)
+    text = _SPLIT_ORDINAL.sub(r"\1", text)
     text = "\n".join(line.strip() for line in text.split("\n"))
     return _MANY_NEWLINES.sub("\n\n", text).strip()
 

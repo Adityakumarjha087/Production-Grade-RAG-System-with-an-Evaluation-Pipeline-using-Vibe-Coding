@@ -23,8 +23,32 @@ class TestNormalizeText:
         assert normalize_text("Ends here.\nNext") == "Ends here.\nNext"
 
     def test_collapses_whitespace_and_unicode(self) -> None:
-        assert normalize_text("  a  b\t c  ") == "a b c"
+        assert normalize_text("  a  b\t c  ") == "a b c"
         assert normalize_text("ﬁle") == "file"  # NFKC ligature
+
+    @pytest.mark.parametrize(
+        ("raw", "expected"),
+        [
+            ("effect from 7 th September 2026", "effect from 7th September 2026"),
+            ("w.e.f. 1 st April 2026", "w.e.f. 1st April 2026"),
+            ("the 2 nd and 3 rd tranche", "the 2nd and 3rd tranche"),
+            ("1\nst April", "1st April"),
+        ],
+    )
+    def test_reattaches_superscript_ordinal_suffixes(self, raw: str, expected: str) -> None:
+        assert normalize_text(raw) == expected
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Regulation 23 the provisions apply",
+            "Chapter 5 Standard operating procedure",
+            "Rs. 10 thousand crore",
+            "para 4 nder review",
+        ],
+    )
+    def test_does_not_glue_words_that_merely_start_like_an_ordinal(self, text: str) -> None:
+        assert normalize_text(text) == text
 
 
 @pytest.mark.parametrize("line", ["3", "Page 3", "page 3 of 10", " 4/12 "])

@@ -26,6 +26,11 @@ from ragsys.models import Chunk, Document
 
 log = structlog.get_logger(__name__)
 
+# Bump whenever a parser, the shared element builder, text normalisation or the
+# Document schema changes: the cache is keyed by PDF content, so without this a
+# changed pipeline would keep serving documents produced by the old one.
+PARSE_SCHEMA_VERSION = 2
+
 
 @dataclass
 class ParseReport:
@@ -57,7 +62,7 @@ def find_pdfs(raw_dir: Path) -> list[Path]:
 def _cache_path(parsed_dir: Path, parser: str, path: Path) -> Path:
     from ragsys.ingestion.parsers.base import file_doc_id
 
-    return parsed_dir / parser / f"{file_doc_id(path)}.json"
+    return parsed_dir / parser / f"{file_doc_id(path)}.v{PARSE_SCHEMA_VERSION}.json"
 
 
 def _parse_one(path: Path, parser: Parser, fallback: Parser | None) -> tuple[Document, bool]:

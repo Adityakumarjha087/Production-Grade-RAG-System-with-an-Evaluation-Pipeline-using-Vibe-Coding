@@ -8,9 +8,16 @@ from qdrant_client import QdrantClient
 from ragsys.embeddings import HashEmbedder
 from ragsys.indexing.bm25 import BM25Encoder
 from ragsys.indexing.qdrant_store import QdrantStore, alias_target
+from ragsys.ingestion import pipeline
 from ragsys.ingestion.chunkers import StructuralChunker
 from ragsys.ingestion.parsers import PyMuPDFParser
-from ragsys.ingestion.pipeline import chunk_corpus, find_pdfs, index_chunks, parse_corpus
+from ragsys.ingestion.pipeline import (
+    PARSE_SCHEMA_VERSION,
+    chunk_corpus,
+    find_pdfs,
+    index_chunks,
+    parse_corpus,
+)
 from ragsys.models import Document
 
 
@@ -33,6 +40,14 @@ def test_parse_corpus_caches(sample_pdfs: list[Path], tmp_path: Path) -> None:
     second = parse_corpus(sample_pdfs, tmp_path, PyMuPDFParser())
     assert first.from_cache == 0 and second.from_cache == len(sample_pdfs)
     assert [d.text for d in first.documents] == [d.text for d in second.documents]
+
+
+def test_parse_cache_is_invalidated_by_a_schema_version_bump(
+    sample_pdfs: list[Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    parse_corpus(sample_pdfs, tmp_path, PyMuPDFParser())
+    monkeypatch.setattr(pipeline, "PARSE_SCHEMA_VERSION", PARSE_SCHEMA_VERSION + 1)
+    assert parse_corpus(sample_pdfs, tmp_path, PyMuPDFParser()).from_cache == 0
 
 
 def test_parse_corpus_uses_fallback(sample_pdfs: list[Path], tmp_path: Path) -> None:
