@@ -6,7 +6,11 @@ name: ragsys
 x-app-env: &app-env
   QDRANT_URL: http://qdrant:6333
   REDIS_URL: redis://redis:6379/0
-  RAG_CONFIG: ${RAG_CONFIG:-configs/docker.yaml}
+  # Deliberately NOT ${RAG_CONFIG:-...}: compose interpolates that from the host's
+  # .env, where .env.example sets RAG_CONFIG=configs/local.yaml for CLI use. The
+  # container would then silently run the local config - docling (absent from the
+  # slim image) and the in-process cache, leaving the redis service unused.
+  RAG_CONFIG: ${DOCKER_RAG_CONFIG:-configs/docker.yaml}
 
 services:
   qdrant:

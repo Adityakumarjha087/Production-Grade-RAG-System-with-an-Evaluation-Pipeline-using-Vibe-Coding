@@ -354,6 +354,29 @@ chunks. Headline numbers (best per column in the report):
 floor, not a quality claim (D-014); re-judge with RAGAS + a real key before quoting.
 Test-set hash `35847bb67685`; items are hand-written seeds pending human review (D-016).
 
+## D-032 · The compose stack was silently running the local config
+
+**Found during packaging QA.** `x-app-env` set
+`RAG_CONFIG: ${RAG_CONFIG:-configs/docker.yaml}`. Compose interpolates `${RAG_CONFIG}`
+from the **host** environment and the project's `.env` — and `.env.example` instructs
+you to set `RAG_CONFIG=configs/local.yaml` for CLI use. So on any developer machine
+that followed the README, every container ran `configs/local.yaml`:
+
+* `parser: docling`, which is deliberately **absent from the slim serving image**
+  (D-024) — in-container parsing only appeared to work because the host parse cache was
+  mounted and warm;
+* `cache.backend: memory`, so the `redis` service was running, healthy, wired into
+  `REDIS_URL` — and completely unused. The "request caching" the stack advertises was
+  per-replica and invisible.
+
+Nothing failed loudly; the defaults simply never applied.
+**Decision.** The containerised stack declares its own config and no longer shares a
+variable name with the host CLI: `RAG_CONFIG: ${DOCKER_RAG_CONFIG:-configs/docker.yaml}`.
+Overriding is still one variable (`DOCKER_RAG_CONFIG=...`), but a value meant for the
+host CLI can no longer leak into a container.
+**Lesson.** `${VAR:-default}` in a compose file is not a default — it is "whatever the
+host has, else a default". For anything the image's correctness depends on, pin it.
+
 ---
 
 ## Known limitations / next steps
