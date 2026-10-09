@@ -337,6 +337,23 @@ the `Document` schema changes; a test asserts a bump forces a re-parse. This is 
 ingestion-side analogue of the index version (D-010) and the cache fingerprint (D-018):
 **every derived artefact is keyed by everything that produced it.**
 
+## D-031 · First full evaluation on the real corpus (496 circulars, 28-item seed set)
+
+Run `20261009T063824Z` (git `ee34676`): 3 chunkers × 5 retrieval variants, extractive
+answerer, lexical judge. Indexes: fixed 6 466 / recursive 6 808 / structural 7 986
+chunks. Headline numbers (best per column in the report):
+
+| finding | evidence |
+|---|---|
+| **BM25 alone beats dense alone** on regulatory text | R@1 0.729 vs 0.500 (structural), R@5 0.958 vs 0.854 — circulars are identifier- and date-heavy, exactly where embeddings are weak (D-006 vindicated) |
+| **Fusion + rerank is what reaches R@5 = 1.000** | hybrid_rerank hits 1.000 R@5 on fixed and structural; no single retriever does |
+| **bge-reranker wins precision, loses latency** | best R@1 0.833 / MRR 0.917 (fixed) but p50 3.5 s vs 1.2 s for MiniLM-L12 — keeps MiniLM the serving default (D-009), bge an offline/quality option |
+| **Abstention gate: no false refusals, weak recall** | false_abstain_rate 0.000 everywhere; abstain_recall only 0.25–0.50 — the synthetic-corpus thresholds (D-012) are too conservative on real data, and the extractive answerer cannot perform layer-2 instructed abstention |
+
+`correctness` ≈ 0.30 is the lexical token-F1 proxy against reference answers — it is a
+floor, not a quality claim (D-014); re-judge with RAGAS + a real key before quoting.
+Test-set hash `35847bb67685`; items are hand-written seeds pending human review (D-016).
+
 ---
 
 ## Known limitations / next steps
@@ -347,4 +364,6 @@ ingestion-side analogue of the index version (D-010) and the cache fingerprint (
 * Multi-column layouts: the PyMuPDF fallback reads top-to-bottom.
 * No auth / rate limiting on the API (put it behind a gateway).
 * Orphaned collections from crashed index builds are not garbage-collected.
-* Thresholds (D-012) must be re-calibrated on the real corpus and real test set.
+* Thresholds (D-012) must be re-calibrated on the real corpus: D-031 measured
+  abstain_recall 0.25–0.50 at zero false refusals — raise `min_rerank_score` /
+  `min_dense_score` until abstain_recall rises without false abstentions appearing.

@@ -14,3 +14,4 @@ eval/results/
 .DS_Store
 *.log
 logs/
+.omo/

@@ -124,6 +124,10 @@ Configs compose with `extends: base.yaml`.
 * **Abstention**: precision/recall on unanswerable items, false-abstention rate.
 * Output: `eval/results/<timestamp>/report.md` (+ CSV, JSON, exact config, git SHA,
   test-set hash). LLM calls are disk-cached, so re-runs are free.
+* Measured on the real corpus (496 circulars, 28 seed items): BM25 alone beats dense
+  alone on this identifier-heavy text; hybrid + rerank reaches recall@5 = 1.0; the
+  bge reranker buys +0.10 recall@1 over MiniLM for ~3× the latency — see
+  [D-031](DECISIONS.md#d-031--first-full-evaluation-on-the-real-corpus-496-circulars-28-item-seed-set).
 
 ## Tests
 
@@ -133,7 +137,7 @@ make test-slow    # real ONNX embedder + both rerankers + Docling (downloads mod
 make check        # ruff + mypy --strict + all tests
 ```
 
-210 tests cover:
+232 tests cover:
 * chunker contracts (exact spans, full coverage, stable ids)
 * BM25 maths and identifier search
 * the blue/green alias swap
