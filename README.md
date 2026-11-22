@@ -163,11 +163,13 @@ src/ragsys/
   evaluation/  testset · review · retrieval_metrics · answer_metrics · runner · report
   api/         app (FastAPI + SSE) · middleware (request id) · schemas
   observability/ logging · tracing (Langfuse) · cost
+  devtools/    sample_corpus.py (synthetic PDFs) · sebi_fetch.py (resumable corpus download)
   service.py   request orchestration      factory.py  composition root
   cache.py     exact-match cache          config.py   settings + YAML config
-  cli.py       ragsys ingest|query|testset|eval|serve|sample-data
-configs/       base.yaml · local.yaml · docker.yaml · experiments/matrix.yaml
+  cli.py       ragsys ingest|query|testset|eval|serve|sample-data|fetch-sebi
+configs/       base.yaml · local.yaml · docker.yaml · experiments/matrix.yaml · testsets/sebi_seed.yaml
 tests/         unit/ (hermetic) · integration/ (CLI e2e, real models, Langfuse export)
+scripts/       smoke_test.sh (end-to-end checks against a running API)
 ```
 
 ## Observability
