@@ -137,7 +137,7 @@ make test-slow    # real ONNX embedder + both rerankers + Docling (downloads mod
 make check        # ruff + mypy --strict + all tests
 ```
 
-232 tests cover:
+238 tests cover:
 * chunker contracts (exact spans, full coverage, stable ids)
 * BM25 maths and identifier search
 * the blue/green alias swap
