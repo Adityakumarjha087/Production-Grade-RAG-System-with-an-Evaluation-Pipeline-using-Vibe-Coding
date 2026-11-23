@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
@@ -72,6 +74,20 @@ def test_config_requires_a_first_stage() -> None:
 def test_pipeline_rejects_missing_components() -> None:
     with pytest.raises(ValueError, match="dense"):
         RetrievalPipeline(RetrievalConfig(), None, None, None)
+
+
+@pytest.mark.parametrize(
+    ("overlay", "given", "missing"),
+    [
+        ({"sparse": {"enabled": True}, "rerank": {"enabled": False}}, {"dense"}, "sparse"),
+        ({"rerank": {"enabled": True}}, {"dense", "sparse"}, "rerank"),
+    ],
+)
+def test_pipeline_names_the_missing_component(overlay: dict, given: set[str], missing: str) -> None:
+    parts: dict[str, Any] = {name: object() for name in given}
+    cfg = RetrievalConfig.model_validate({"dense": {"enabled": True}, **overlay})
+    with pytest.raises(ValueError, match=rf"^{missing}\b.*enabled but no"):
+        RetrievalPipeline(cfg, parts.get("dense"), parts.get("sparse"), None)  # type: ignore[arg-type]
 
 
 OFF = {"enabled": False}
