@@ -184,6 +184,11 @@ class TestConfig:
         with pytest.raises(ValueError, match="Circular"):
             load_config(tmp_path / "a.yaml")
 
+    def test_non_mapping_root_is_rejected(self, tmp_path: Path) -> None:
+        (tmp_path / "list.yaml").write_text("- a\n- b\n")
+        with pytest.raises(ValueError, match="must be a mapping"):
+            load_config(tmp_path / "list.yaml")
+
     def test_blank_secrets_are_unset(self, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv("ANTHROPIC_API_KEY", "")
         monkeypatch.setenv("LANGFUSE_SECRET_KEY", "  ")
