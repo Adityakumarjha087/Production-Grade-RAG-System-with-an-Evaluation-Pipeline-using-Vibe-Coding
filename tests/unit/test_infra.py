@@ -13,7 +13,13 @@ from ragsys.config import ModelPrice, Settings, deep_merge, load_config
 from ragsys.factory import build_cache
 from ragsys.models import Answer, Usage
 from ragsys.observability.cost import compute_cost, find_price
-from ragsys.observability.tracing import LangfuseSpan, NoopSpan, NoopTracer, make_tracer
+from ragsys.observability.tracing import (
+    LangfuseSpan,
+    LangfuseTracer,
+    NoopSpan,
+    NoopTracer,
+    make_tracer,
+)
 from tests.conftest import ROOT, offline_config
 
 
@@ -164,6 +170,40 @@ class TestTracing:
                 raise RuntimeError
 
         assert isinstance(LangfuseSpan(Broken()).child("x"), NoopSpan)
+
+    def test_tracer_wraps_root_observation_and_flushes(self) -> None:
+        seen: list[Any] = []
+
+        class Client:
+            def start_observation(self, **kw: Any) -> Any:
+                seen.append(kw)
+                return type("Obs", (), {"trace_id": "t9"})()
+
+            def flush(self) -> None:
+                seen.append("flushed")
+
+        tracer = LangfuseTracer.__new__(LangfuseTracer)  # skip the real Langfuse client
+        tracer._client = Client()
+        span = tracer.start_trace("query", input="q", metadata={"k": 1})
+        assert isinstance(span, LangfuseSpan) and span.trace_id == "t9"
+        tracer.flush()
+        assert seen == [
+            {"name": "query", "as_type": "chain", "input": "q", "metadata": {"k": 1}},
+            "flushed",
+        ]
+
+    def test_tracer_failures_never_reach_the_request(self) -> None:
+        class Down:
+            def start_observation(self, **kw: Any) -> None:
+                raise RuntimeError("langfuse down")
+
+            def flush(self) -> None:
+                raise RuntimeError("langfuse down")
+
+        tracer = LangfuseTracer.__new__(LangfuseTracer)
+        tracer._client = Down()
+        assert isinstance(tracer.start_trace("query"), NoopSpan)
+        tracer.flush()  # must not raise
 
 
 class TestConfig:
